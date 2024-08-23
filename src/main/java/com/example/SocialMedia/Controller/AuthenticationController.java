@@ -3,6 +3,7 @@ package com.example.SocialMedia.Controller;
 import com.example.SocialMedia.Domain.User;
 import com.example.SocialMedia.Dtos.LoginUserDto;
 import com.example.SocialMedia.Dtos.RegisterUserDto;
+import com.example.SocialMedia.Repository.TokenValidationResponse;
 import com.example.SocialMedia.Response.LoginResponse;
 import com.example.SocialMedia.Service.AuthenticationService;
 import com.example.SocialMedia.Service.JwtService;
@@ -41,14 +42,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(loginResponse);
     }
 
-    @GetMapping("/token")
-    public ResponseEntity<LoginResponse> generateTokenGet(@RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-        return ResponseEntity.ok(loginResponse);
+    @GetMapping("/validate-token")
+    public ResponseEntity<TokenValidationResponse> validateTokenGet(@RequestParam String token) {
+        boolean isValid = jwtService.isTokenValid(token);
+        TokenValidationResponse response = new TokenValidationResponse(isValid);
+        return ResponseEntity.ok(response);
     }
-
     @PostMapping("/token")
     public ResponseEntity<LoginResponse> generateTokenPost(@RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
