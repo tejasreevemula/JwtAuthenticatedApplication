@@ -29,6 +29,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -66,6 +67,8 @@ public class JwtService {
 
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
+
+
     public boolean isTokenValid(String token) {
         try {
             final String username = extractUsername(token);
@@ -78,9 +81,13 @@ public class JwtService {
     }
 
 
+//    private boolean isTokenExpired(String token) {
+//        return extractExpiration(token).before(new Date());
+//    }
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return extractClaim(token, Claims::getExpiration).before(new Date());
     }
+
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
@@ -98,5 +105,11 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+
+    @FunctionalInterface
+    private interface ClaimsResolver<T> {
+        T resolve(Claims claims);
     }
 }
